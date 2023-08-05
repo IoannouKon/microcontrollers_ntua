@@ -1,0 +1,39 @@
+IN 10H
+START:
+	MVI E,00H 	; E  = 0
+	LDA 2000H	; A = input 
+	MOV B,A 	;B = store input
+
+CHECK_FOR_ONE: 
+	MOV A,B          ;   
+INR E	              ; E++
+	RLC  ;   cy = MSB and   MSB-> LSB 
+	JC MAKE_DISPLAY1  ; if MSB =1 
+	MOV B,A            ; store the rotated A 
+	MOV A,E            ; A = E, for CPI
+	CPI 08H	; if A = 8 then z =1	
+	JZ NO_ONE 	;if the input has only zeros jump to NO_ONE 
+JMP CHECK_FOR_ONE	; else repeat check
+
+MAKE_DISPLAY1:	; if we find the MSB 1 
+	MVI A,00H        ; A = 0 , clear the input
+	JMP MAKE_DISPLAY2  
+
+MAKE_DISPLAY2: 
+	ADI 01H	; put 1 to LSB
+	RRC            ; LSB->MSB
+	DCR  E		; E -> E-1  
+	JZ RESULT	;  if E = 0 jump to RESULT
+	JMP MAKE_DISPLAY2	; else loop until E =0 
+	
+NO_ONE:         
+	MVI A,00H	; A = 0  
+	
+RESULT:	; print the result 
+	CMA  
+	STA 3000H	; A -> output
+	JMP START	;Loop 
+END
+
+
+

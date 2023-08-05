@@ -1,0 +1,55 @@
+IN 10H      ;Επιτρέπει την πρόσβαση σε ολη την RAM
+LXI B,01F4H ;Χρησιμοποιείτε για την καθυστέρηση BC=data(01F4)
+MVI E,FEH   ;Θέση που αρχίζει το led ,πρώτο led E=data(FEH)
+
+START:
+LDA 2000H     ; A =data(2000) το Α παίρνει την είσοδο
+RRC           ; Μετακίνηση Δεξια
+JC START_LEFT
+RRC           ;Μετακίνηση Δεξιά
+JC START      ;Αν cy=1 Jump
+JMP CIRCLE
+
+START_LEFT:
+LDA 2000H     ;A=data(2000) το Α παίρνει την είσοδο
+RRC          ;Μετακίνηση Δεξιά
+JNC CIRCLE    ;Αν cy=0 Jump 
+RRC           ;Μετακίνηση Δεξιά
+JC START_LEFT ;Αν cy=1 Jump
+JMP LEFT
+
+START_RIGHT:
+LDA 2000H      ;ο Α παίρνει την είσοδο
+RRC            ;Μετακίνηση Δεξια
+JNC CIRCLE
+RRC            ;Μετακίνηση Δεξιά
+JC START_RIGHT ;Αν έχει κρατούμενο jump
+JMP RIGHT 
+
+LEFT:
+CALL DELB ;Καθυστέρηση 0.5sec
+MOV A,E   ; Α=data(E) το Α παίρνει την προηγούμενη του θέση
+STA 3000H ; data(3000) = A , LED ON στην έξοδο στην θέση που ειναι ο Α
+RLC       ;Μετακίνηση Αριστερά
+JNC RIGHT ;Αν δεν έχει κρατούμενο jump
+MOV E,A   ;E= data(A) κρατάμε την τρέχουσα θέση του Α
+JMP START_LEFT
+
+RIGHT:
+CALL DELB ;Καθυεστέρηση 0.5sec
+MOV A,E   ;Α=data(E) ο Α παίρνει την προηγουμενη του θέση
+STA 3000H ;LED ON στην έξοδο στην θέση που ειναι ο Α
+RRC       ;Mετακίνηση Δεξιά
+JNC LEFT  ;Aν cy=0 jump
+MOV E,A   ;Ε=data(A) αποθήκευσε την τρέχουσα θέση του Α
+JMP START_RIGHT
+
+CIRCLE:
+CALL DELB ;Καθυστέρηση  
+MOV A,E   ;A=data(E) ο Α παίρνει την προηγούμενη του θέση
+STA 3000H ;data(3000)=A LED ON στην έξοδο στην θέση του Α
+RLC       ;Μετακίνηση Αριστερά
+MOV E,A   ;E=data(A) αποθηκεύουμε την τρέχουσα θέση του Α
+JMP START
+
+END

@@ -1,0 +1,117 @@
+
+IN 10H
+MVI A,0DH		; Κάνει μασκ το RST 6.5
+	SIM
+	EI				; Κάνει enable τα interrupts
+LXI H,0A05H	; Δίνουμε την τιμή 0 στα 2 αριστερότερα 7-seg-displays που θα χρησιμοποιήσουμε	
+	MVI M,00H
+	DCX H
+	MVI M,00H
+	DCX H
+	MVI C,04H
+EMPTY_DISPLAY:		; Αδειάζουμε τα 4 δεξιότερα 7-seg-displays
+	MVI M,10H	; (0Α04) -> (0Α00) = 10Η κενά 7-seg-displays
+	DCX H		
+	DCR C		
+	JNZ EMPTY_DISPLAY
+
+RESET_DISPLAY:		; Μηδενίζουμε τα αριστερότερα 7-seg-displays όταν τελειώσουν τα 45 sec
+	LXI H,0A05H
+	MVI M,00H
+	DCX H
+	MVI M,00H
+	MVI A,FFH
+	STA 3000H
+WAITTING_ROOM:		; Περιμένει να πατηθεί το INTRPT κι δείχνει την 00 στο χρονόμετρο
+	CALL DISPLAY		; και θα γεμίσει τον Α με άσσους σε περίπτωση που είχε κάποια άλλη τιμή να μην επιρεαστούν τα LEDS 
+	JMP WAITTING_ROOM ; κάνει enable τα interrupts ώστε να μπορεί να κάνει ανανέωση άμα ξαναπατηθεί το INRPT
+								
+INTR_ROUTINE:		; Όταν πατηθεί το interrupt το PC θα πάει εδώ 
+	MVI C,2DH		; Θα δώσει στο C (=counter) την τιμή 45  
+	MVI A,FFH		; και θα γεμίσει τον Α με άσσους σε περίπτωση που είχε κάποια άλλη τιμή να μην επιρεαστούν τα LEDS 
+	EI					; κάνει enable τα interrupts ώστε να μπορεί να κάνει ανανέωση άμα ξαναπατηθεί το INRPT
+
+BLINK:
+	CMA				; Αντιστροφή του Α ώστε να αναβοσβήνουν τα LEDS
+	STA 3000H
+	CALL DEC_COUNTER		; Διαμόρφωση του counter για να τυπωθεί η νέα τιμή 
+	
+	MVI E,0AH				; Βαάζουμε στον καταχωρητή Ε τιμή 10 που θα είναι ο αριθμός των επαναλήψεων που θα καλούν 
+LOOP_DISPLAY1:			; την υπορουτήνα DISPLAY για να αποφύγουμε να αναβωσβήνει το counter 
+	CALL DISPLAY			; Η DISPLAY κρατάει 25ms
+	DCR E						; την καλεί 10 φορές 10x25=250ms 
+	JNZ LOOP_DISPLAY1
+
+	CMA						; τα LEDS θα αλλάζουν τιμές κάθε 250ms οπότε μια περίοδος 500ms
+	STA 3000H				; το κάνουμε αυτό 4 φορές δηλαδή αναβοσβήνουν για 1sec πρωτού μιωθεί το counter 
+	
+	MVI E,0AH
+LOOP_DISPLAY2:
+	CALL DISPLAY
+	DCR E
+	JNZ LOOP_DISPLAY2
+
+	CMA
+	STA 3000H
+
+	MVI E,0AH
+LOOP_DISPLAY3: 
+	CALL DISPLAY
+	DCR E
+	JNZ LOOP_DISPLAY3
+
+	CMA
+	STA 3000H
+
+	MVI E,0AH
+LOOP_DISPLAY4:
+	CALL DISPLAY
+	DCR E
+	JNZ LOOP_DISPLAY4
+
+	DCR C			; Μείωση του counter
+	JNZ BLINK	; ’μα δεν είναι 0 επανάλαβε
+	JMP RESET_DISPLAY	; αλλιώς κάνει RESET 
+
+DEC_COUNTER:	
+	PUSH PSW
+	PUSH B
+	PUSH H
+	
+	MVI B,FFH	
+	MOV A,C
+
+MAKE_COUNTER: 
+	INR B			; αυξάνουμε το Β που αντιπροσωπεύει τις δεκάδες
+	SUI 0AH		;κι αφερούμε το Α μεχρι να γίνει αρνητικό
+	JNC MAKE_COUNTER	
+
+	ADI 0AH 	; του βάζουμε 10
+
+	LXI H,0A04H
+	MOV M,A		; Αποθυκεύουμε την τιμή του Α στο 7-seg-display
+	INX H	
+	MOV M,B		; Αποθυκεύουμε την τιμή του Α στο 7-seg-display
+
+	POP H
+	POP B
+	POP PSW
+	RET
+
+RET
+
+DISPLAY:
+	PUSH PSW
+	PUSH D
+	PUSH B
+	LXI B,0019H
+	LXI D,0A00H		; Φέρνουμε τις διευθήνσεις που έχουμε αποθυκεύσει τις τιμές 
+	CALL STDM			; και τις βάζουμε την μνήμη που θα τις διαβάσει η DCD
+	CALL DCD
+	CALL DELB
+	POP B
+	POP D
+	POP PSW
+RET
+
+END

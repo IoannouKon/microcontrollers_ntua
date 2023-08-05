@@ -1,0 +1,77 @@
+MAIN:	IN 10H	
+	MVI A,0DH	; Κάνει μασκ το RST 6.5	
+	SIM		
+	EI				; Κάνει enable τα interrupts
+
+	MVI B,06H
+	LXI H,0A00H	
+FILL:	MVI M,10H	; Αδειάζουμε τα 7-seg-displays
+	INX H
+	DCR B
+	JNZ FILL
+
+	MVI C,05H	; Κ1
+	MVI D,64H	; K2
+	MVI E,C8H	; K3
+
+	PUSH D
+	LXI D,0A00H		; Φέρνουμε τις διευθήνσεις που έχουμε αποθυκεύσει τις τιμές 
+	CALL STDM		; και τις βάζουμε την μνήμη που θα τις διαβάσει η DCD
+	POP D
+	CALL DCD	
+
+WAIT1:	JMP WAIT1	; περιμένει να πατηθεί το INTRPT
+
+INTR_ROUTINE:
+	CALL KIND 			; Διαβάζει την δεκάδα	
+	STA 0A03H			; την αποθυκεύει στην αριστερα απο το κέντρο 7-seg-displays
+	RLC					; τα πάμε στα τέσσερα MSB  και τον κάνουμε store στον Β
+	RLC
+	RLC
+	RLC	
+	MOV B,A
+	CALL KIND			; Διαβάζει την μονάδα
+	STA 0A02H
+	ADD B		;προσθέτει την με τον Β για να πάρουμε όλο τον αριθμό για να τον συγκρίνουμε
+	CMP C		; Άμα C=>A jump 
+	JC C_won
+	JZ C_won	
+	JMP D_COMP	; Αλλιώς jump D_COMP
+C_won:	
+	MVI A,08H	; Βάζει άσσο στην θέση που δηλώνει σε ποιά περιοχή βρήσκεται
+	JMP END
+
+D_COMP:		; Άμα D=>A jump 
+	CMP D
+	JC D_won
+	JZ D_won
+	JMP E_COMP	; Αλλιώς jump E_COMP
+D_won:	
+	MVI A,04H
+	JMP END
+
+E_COMP:		; Άμα E=>A jump 
+	CMP E
+	JC E_won
+	JZ E_won
+	JMP A_won		; Αλλιώς jump A_won
+E_won:
+	MVI A,02H
+	JMP END
+
+A_won:	MVI A,01H	
+
+END:
+	CMA	;αντιστρέφει την Α για να ανάψει το σωστό LED
+	STA 3000H
+	PUSH D
+	LXI D,0A00H	
+	CALL STDM
+	POP D
+	EI		; Κάνει enable τα interrupts
+
+DISPLAY:	
+	CALL DCD	
+	JMP DISPLAY
+
+	END

@@ -1,0 +1,91 @@
+;(a) ερώτημα 
+
+START:
+  IN  10H
+  MVI A,FFH      ;  Ο καταχωρητής Α αποθηκεύει την τιμή 225
+  LXI  H,0900H  ; Ο καταχωρητής ΗL αποθηκεύει την διεύθνυση 
+  MOV  M,A         ;  Μετακινούμε τα δεδομένα του Α στη μνήμη
+
+STORE:
+ DCR A             ; Mειώνουμε  την τιμή του καταχωρητή κατα  1
+ INX  H        ;Aυξάνουμε το ζεύγος HL κατα  1, ο κατχωρητής HL αποθηκεύει την αμέσως επόμενη διεύθυνση 
+ MOV  M,A         ;  Αποθηκέυουμε στην μνήμη την νέα τιμή στην νεά θεση
+ CPI  00H          ; Εαν A = 0  τότε z = 1
+ JNZ  STORE     ; Mέχρι το Α να γίνει 0 επανέλαβε  , μέχρι δηλαδή  z =1 
+
+ ;END
+
+;(b) ερώτημα
+ 
+LXI D,0000H ; Αρχικοποιούμε τον καταχωρητή στην τιμή 0 
+
+LOAD:
+  MOV A,M     ; Μετακίνηση απο Μ σε Α 
+              ; αρχικά εχει την τιμή  00 ,αφού αυτη βάλαμε
+               ; τελευεταία στο πρώτο ερώτημα
+  MVI B,09H ; Βάζουμε Β = 9 γιατί έχουμε 8 ψηφία να 
+             ; ελένξουμε  και το πρόγραμμα αρχίζει μειώνοντας το κατα -1 
+
+CHECK_DIGITS:
+    DCR B ; B-1
+    jZ NEXT_DIGIT ; Εαν D = 0 πήγαινε στον επόμενο αριθμό (απο τους 225)
+    RRC ; Ολίσθηση δεξία πάμε στο επόμενο ψηφίο 
+        ; και Cy =τρέχον ψηφίο 
+    JC CHECK_DIGITS ; Ενα Cy=1 Πήαινε στο επόμενο ψηφίο 
+                   ; αλλιως πρόσθεσε στο counter
+  
+
+COUNTER_ZEROS:
+     INX D ; D + 1
+     JMP CHECK_DIGITS
+
+NEXT_DIGIT:
+    DCR L ; απο ζεύγος ΗL  L -1 , πάμε δηλαδή στην προηγουμενη διεύθυνση της μνήμης μέχρι να φτάσουμε στην 0900Η
+    JNZ LOAD ; Εαν L !=0  LOAD πηγαινε στο επόμενο αριθμό αλλιως ενα L =0  END 
+
+ ;END
+
+;NEXT_DIGIT: to test it remove the other digit function  
+;DCR L 
+;JNZ LOAD
+;MOV A,E  OR MOV A,D
+;CMA 
+;STA 3000H
+;END
+
+
+;(c) Ερώτημα 
+
+		MVI E,FFH    ; Ε = 225
+		MVI B,00H    ; B = 0 (counter)
+		MOV A,M      ; Α = Data(M)=Data(0900H)= 225 (M=0900H from before)
+STATEMENT:
+                
+ 		CPI 20H      ;If A<20H -> Cy =1 ->DONT_COUNT Else continue
+		JC DONT_COUNT ; Jump if Cy=1   
+		CPI 71H      ;If A>=71H  -> Cy=0 ->DONT_COUNT Else continue
+		JNC DONT_COUNT ; Jump if Cy=0   
+		INR B        ; B++  , Counter increase because  20H=<A<=70H
+DONT_COUNT:	
+		INR L        ; Πήγαινε στην επόμενη θέση της μνήμης
+		MOV A,M      ; Α =data(M)
+		DCR E        ; E-- , if E =0  -> z=1   
+              JZ LAST      ; if z=1 jump to LAST
+		JMP STATEMENT
+LAST:
+
+        CPI 20H  
+        JC END
+        CPI 71H
+        JNC END
+        INR B 
+      		
+	END:
+        MOV A,B 
+        STA 3000H
+        END
+
+
+
+
+   

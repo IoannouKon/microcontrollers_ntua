@@ -1,0 +1,60 @@
+IN 10H      ; Επιτρέπει πρόσβαση σε ολη την RAM
+LXI B,01F4H ; BC now contains 500, used for delay later
+MVI A,FEH   ; LED starting position
+
+PRINT:
+STA 3000H  ;data(3000H) = A  ανάβειη θέση που δίχνει ο Α
+MOV D,A    ; D=A αποθηκεύω την τρέχουσα  θέση του Α 
+
+START:
+CALL DELB ; 0.5s delay
+LDA 2000H ; Α =data(2000H) , παίρνει την είσοδο 
+ANI 03H   ; A=(A)AND(0..011) κρατάμε μόνο τα 2LSB bits
+CPI 01H   ; if A==01 z=1 else z=0
+JZ MOVE_LEFT ;if z=1 Jumb
+
+RETURN:
+CPI 00H   ; if A==00 z=1 else z=0
+JZ CYCLE_LEFT ; if z=1 Jumb
+MOV A,D ;A =D δηλαδή παίρνει την θέση που βρισκόταν πριν
+STA 3000H ;data(3000H) =A ,Led στην θέση του A ON
+JMP START 
+
+CYCLE_LEFT:
+MOV A,D ; A now contains previous LED position
+RLC     ; πάμε μια θέση αριστερά
+JMP PRINT
+
+MOVE_LEFT:
+MOV A,D ; A now contains previous LED position
+CPI 7FH ; if LED is in MSB z=1
+JZ MOVE_RIGHT ; if z=1 jumb
+
+MOV A,H
+CPI 01H
+JZ MOVE_RIGHT
+MOV A,D
+
+
+RLC     ; παμε μια θεση αριστερά 
+JMP PRINT
+
+MOVE_RIGHT:
+MVI H,00H
+MOV A,D ; A now contains previous LED position
+CPI FEH ; if LED is in LSB
+JZ MOVE_LEFT
+RRC
+STA 3000H
+
+MOV D,A ; D contains previous LED position
+CALL DELB ; 0.5s delay
+LDA 2000H
+ANI 03H ; nullifies all bits except the 2 LSBs
+CPI 01H 
+JZ MOVE_RIGHT
+
+MVI H,01H
+ 
+JMP RETURN
+END

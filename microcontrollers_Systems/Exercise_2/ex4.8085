@@ -1,0 +1,83 @@
+LXI B,01F4H
+START:
+LDA 2000H  ; load input to A   =  A3 B3 A2 B2 A1 B1 A0 B0
+MOV B,A       ; Save A to B , B =  A3 B3 A2 B2 A1 B1 A0 B0 	
+MVI D,00H
+
+ A0_B0:
+	ANI 01H	; A = 0 0 0 0 . 0 0 0 B0
+	MOV C,A	; C = 0 0 0 0 . 0 0 0 B0
+	MOV A,B	; A =    A3 B3 A2 B2 A1 B1 A0 B0 
+          	ANI 02H	; A =  0 0 0 0 . 0 0 A0 0
+
+OR0:
+	RRC		;     A =  0 0 0 0 . 0 0 0  A0
+	
+ORA C		; A OR C         A =  0 0 0 0 . 0 0 0  (A0 OR B0)
+MOV  D,A	;D =OR0 output
+
+A1_B1:
+      	MOV A,B	; A = input    A3 B3 A2 B2 A1 B1 A0 B0
+	ANI 04H	; A = 0 0 0 0 . 0 B1 0 0
+	MOV C,A	; C = 0 0 0 0 . 0 B1 0 0
+	MOV A,B	; A =  input    A3 B3 A2 B2 A1 B1 A0 B0
+          	ANI 08H	; A = 0 0 0 0 . A1 0 0 0
+
+
+0R1:
+RRC		;    A  = 0 0 0 0.0 A1 0 0	
+ORA C		; X1 = A1 OR B1,              A  = 0 0 0 0 . 0 X1 0 0  
+ RRC                 	; Rotate right to get  x1    A  = 0 0 0 0 . 0 0  X1 0   
+MOV  E,A	; E = 0 0 0 0 . 0 0  X1 0  
+RRC                  ; Rotate right to get x0 ,   A  = 0 0 0 0 . 0 0 0 X1
+ANA D	  	; A = 0 0 0 0. 0 0 0 X0
+ADD E	;  A    = 0 0 0 0 . 0 0 X1 X0  
+	MOV D,A	;  D = 0 0 0 0 . 0 0 X1 X0
+
+ 
+A2_B2:
+   	MOV A,B	; A = input    A3 B3 A2 B2 A1 B1 A0 B0
+	ANI 10H	; A = 0 0 0 B2 . 0 0 0 0
+	MOV C,A	; C = 0 0 0 B2 . 0 0 0 0
+	MOV A,B	; A =  input    A3 B3 A2 B2 A1 B1 A0 B0
+          	ANI 20H	; A = 0 0 A2 0 . 0 0 0 0
+
+
+
+
+
+
+
+AND_A2_B2:
+RRC 		; A = 0 0 0 A2 . 0 0 0 0
+ANA C		; A AND C - >   0 0  0 X2 . 0 0 0 0
+MOV L,A             ; L =    0 0  0 X2 . 0 0 0 0
+	RRC
+	RRC		; A =  0 0 0 0 . 0 X2 0 0
+	ADD  D	; A =  0 0 0 0 . 0 X2 X1 X0 
+MOV D,A     	; D =  0 0 0 0 . 0 X2 X1 X0
+
+
+A3_B3: 
+ 	MOV A,B	; A = input    A3 B3 A2 B2 A1 B1 A0 B0
+	ANI 40H	; A = 0 B3 0 0 . 0 0 0 0
+	MOV C,A	; C = 0 B3 0 0 . 0 0 0 0
+	MOV A,B	; A =  input    A3 B3 A2 B2 A1 B1 A0 B0
+          	ANI 80H	; A = A3 0 0 0 . 0 0 0 0
+
+AND_A3_B3_:
+
+RRC 		; A = 0 A3 0 0 . 0 0 0 0
+ANA C		; and = A3  AND  B3  - >   0 and  0 0 . 0 0 0 0
+	RRC
+	RRC		; A =  0 0 0 and . 0  0 0 0
+	XRA L                    ; A = 0 0  0  X3. 0 0 0 0
+	RRC                        ;  A =  0 0 0 0 . X3 0 0 0 
+DISPLAY:
+ADD  D	; A =  0 0 0 0 . X3 X2 X1 X0 
+CMA
+STA 3000H
+JMP START
+END
+
+

@@ -1,0 +1,78 @@
+LXI B,0064H ; BC =data(0064H)
+START:
+MVI D,FFH   ; D = 1111 1111 , -1 με συπμλήρωμα ως προς 2
+LDA 2000H   ; A = data(2000H) περνάμε την είσοδο στο Α
+CPI 63H     ; cy=1 if Α<(99)dec else cy=0
+JNC HUN     ; If A>(99)dec jump
+
+DECA:
+INR D    ;D-- , Κρατάμε τις δεκάδες
+SUI 0AH  ;A = A -(10)dec
+JNC DECA ;if A<0 συνέχισε τις αφαιρέσεις 
+ADI 0AH  ;A=A +10 ,αλλιώς διόρθωσε το αερνητικό υπόλοιπο 
+MOV C,A  ; C =A κρατάμε την τιμή του Α με τα LSB
+MOV A,D  ; A =D = Δεκάδες   
+RLC      ;Μετακινούματσε 4 φορές αριστερά ώστε να έχουμε 
+RLC      ;κρατήσουμε στα 4MSB την δεκάδα και μηδενίζουμε
+RLC      ; τα 4LSB 
+RLC 
+ADD C    ;Α = Α + C ,περνάμε στα 4lSB τις μονάδες που κρατήσαμε   
+CMA      ; Αντιστρέφουμε την λογική ώστε 1->ΟΝ 0->off
+STA 3000H ;έξοδος data(3000H)= A = 4MSB 4LSB = Δεκαδες Μοναδες
+JMP START
+
+HUN:
+CPI C7H   ;if A <(199)dec cy=1 else cy=0
+JNC ALARM ;if A>199 jump to ALARM
+SUI 64H   ;A = A -(100)dec 
+JMP DECA  ;jumb to DECA
+
+
+ALARM:
+LXI B,0063H ;Β = (100)dec 
+
+MVI A,F0H   ;A = (1111 0000)bin
+STA 3000H   ;MSB off LSB ON
+
+CALL DELB   ;delay
+MVI A,FFH   ; A =(1111 1111)bin 
+STA 3000H   ;MSB off LSB off
+
+CALL DELB   ;delay
+            ;Επαναλμβάνουμε το ίδιο μοτήβο για κάποιες φορές 
+CALL DELB
+MVI A,F0H
+STA 3000H
+
+CALL DELB
+MVI A,FFH
+STA 3000H
+
+CALL DELB
+MVI A,F0H
+STA 3000H
+
+CALL DELB
+MVI A,FFH
+STA 3000H
+
+
+CALL DELB
+MVI A,F0H
+STA 3000H
+
+CALL DELB
+MVI A,FFH
+STA 3000H
+
+
+CALL DELB
+MVI A,F0H
+STA 3000H
+CALL DELB
+
+JMP START ; Βγαίνουμε απο το ALARM jump στο START
+
+END: 
+HLT
+END

@@ -1,0 +1,62 @@
+;ask 5.2
+
+LXI  H,0000H
+MVI C,20H  ; C =32 demical
+
+MAIN:
+IN 20H
+ANI 00H ; wait until  x0 = 0 
+JNZ MAIN 
+MOV A,C
+ANI 00H     ;00000001 binary
+JPO ALL_MSB
+IN 20H 
+ANI 0FH  ; 00001111 BINARY 
+MOV B,A
+JMP ALL_LSB
+
+
+ALL_MSB:
+IN 20H
+ANI 0FH
+RLC
+RLC
+RLC
+RLC
+ORA B ; συολικό αποτέλεσμα μαζί με LSB
+MVI D,00H
+MOV E,A
+DAD D
+
+ALL_LSB:
+ DCR C ;counter --
+ JZ ADDR 
+
+CHECK: 
+ IN 20H
+ANI 00H   
+JNZ CHECK  ; WAIT UNTIL X0 = 0
+JMP MAIN 
+
+ADDR:
+ MOV A,C
+ CPI 00H
+ JNZ ADDR  ; Έλεγχος εισόδου δεδομένων 
+ DI   ;Απενργοποιήση διακοπών
+ MOV A,L
+ ANI 80H
+ CPI 00H
+ JNZ CUTBACK ; περικοπη
+  
+
+CUTBACK: 
+ANI 00H
+JP L1
+
+
+;Για την περικοπή φτιάχνουμε ρουτίνα εδω
+L1:
+HLT
+
+
+END

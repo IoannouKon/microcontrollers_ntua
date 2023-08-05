@@ -1,0 +1,175 @@
+	LXI B,0032H	;We call delb with 32Hms = 1/5 sec delay
+START:
+	LDA 2000H	;Load input from dip switches to A
+	RRC     	; Rotate left A , Cy = LSB 
+	JNC OFF	;If Cy = LSB = 0  jump to OFF 
+	JMP START     ;else check again the LSB untill is 0 
+
+
+OFF:			;We check if the switch is turned on
+	LDA 2000H    
+	RRC           ;Check LSB 
+	JC ON1		;if LSB  = 1 then go to ON1 else continue
+	JMP OFF	;If LSB =! 1 repeat until LSB becnome 1
+
+
+ON1:			;In order to light up the LEDs we have to switch off
+			;the LSB, but when that happens we'll have to call delb
+	MVI D,FFH	;150 times(we want them on for 15s), that's why D = 150
+	LDA 2000H
+	RRC
+	JNC OPEN	;If LSB turned off then push button(off-on-off) is activated
+	JMP ON1       ;else wait unltill LSB is off 
+
+
+OPEN:
+      
+	LDA 2000H	; A = INPUT
+	RRC		;Check LSB
+	JC ON_AGAIN	;If LSB = 1  (ON)  jump to ON_AGAIN 
+	
+       JP ALARMS
+       MVI A,00H
+	STA 3000H	;Turn on all LEDs
+   
+    
+	DCR D		;Decrease D
+	JNZ OPEN	;If D = 0 then 15 s passed
+	MVI A,FFH
+	STA 3000H	;Turn off all LEDs and start checking again
+       JMP OFF
+
+
+
+ON_AGAIN:		;Getting here means that if the MSB switch turns off then the 
+	LDA 2000H	;timer has to reset.If the MSB stays on the whole time then we
+	RRC		; LSB  = 0 (off)
+	JNC RESTART   ;Restart timer 
+       JP ALARMS2
+ 	MVI A,00H
+	STA 3000H
+	CALL DELB
+	DCR D
+	JNZ ON_AGAIN
+	MVI A,FFH
+	STA 3000H
+       JMP OFF
+
+
+RESTART:		;If on-off occured while we had the LEDs on then reset the timer
+	MVI D,FFH
+	JMP ALARMS
+
+	
+
+
+ALARMS:
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+
+
+
+
+DCR D	; D--
+JNZ OPEN ;
+JZ OFF ;15 sec has passed 
+
+
+
+ALARMS2:
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+MVI A,00H
+	STA 3000H
+	CALL DELB
+
+MVI A,FFH
+	STA 3000H
+CALL DELB
+
+
+
+
+
+DCR D	; D--
+JNZ ON_AGAIN ;
+JZ OFF ;15 sec has passed 
+
+
+
+END

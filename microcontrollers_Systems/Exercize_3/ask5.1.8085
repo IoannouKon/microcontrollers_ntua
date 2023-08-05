@@ -1,0 +1,59 @@
+MVI A,0DH  ;Μάσκα διακοπών 
+SIM
+LXI  H,0000H   ; Εδώ θα βάζουμε τα δεδομένα
+MVI C,20H   ; counter = 32 (demical)
+EI      ; Ενεργοποίηση δεδομένων 
+
+ADDR:
+ MOV A,C
+ CPI 00H
+ JNZ ADDR  ; Έλεγχος εισόδου δεδομένων 
+ DI   ;Απενργοποιήση διακοπών
+ MOV A,L
+ ANI 80H
+ CPI 00H
+ JNZ CUTBACK ; περικοπη
+
+;Για την περικοπή φτιάχνουμε ρουτίνα εδω
+L1:
+HLT
+
+CUTBACK: 
+ANI 00H
+JP L1
+
+002C:
+JMP RST5.5
+
+RST5.5:
+
+PUSH PSW
+MOV A,C 
+ANI 01H  ; Κρατάει δυαδικό LSB 00000001 binary
+JPO ALL_MSB   ; MSB  from data
+IN 20H
+ANI 0FH ; 00001111 δυαδικό για τα 4  LSB 
+MOV B,A   ; αποθηκέουμε προσωρνά τα LSB μέχρι να λάβουμε MSB
+JMP ALL_LSB ;  LSB from data
+
+ALL_MSB:
+IN 20H
+ANI 0FH
+RLC
+RLC
+RLC
+RLC
+ORA B ; συολικό αποτέλεσμα μαζί με LSB
+MVI D,00H
+MOV E,A
+DAD D
+
+ALL_LSB:
+   POP PSW
+   DCR C ; counter--
+   EI
+   RET 
+
+END
+
+ 
