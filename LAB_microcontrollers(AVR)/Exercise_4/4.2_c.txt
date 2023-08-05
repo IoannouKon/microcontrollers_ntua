@@ -1,0 +1,268 @@
+#define F_CPU 16000000UL
+#include "avr/io.h"
+#include<avr/interrupt.h>
+#include<util/delay.h>
+
+int h = 0;
+void write_2_nibbles(char x)
+{
+	char y=PIND & 0x0f;
+	char x1=x & 0xf0;
+	x1=x1+y;
+	PORTD=x1;
+	PORTD=PORTD | (1<<PD3);
+	PORTD=PORTD & (0<<PD3);
+	x=x<<4 | x>>4;
+	x=x & 0xf0;
+	PORTD=x+y;
+	PORTD=PORTD | (1<<PD3);
+	PORTD=PORTD & (0<<PD3);
+}
+
+void lcd_data(char x)
+{
+	PORTD=PORTD | (1<<PD2);
+	write_2_nibbles(x);
+	_delay_us(40);
+}
+
+void lcd_command(char x)
+{
+	PORTD=PORTD | (0<<PD2);
+	write_2_nibbles(x);
+	_delay_us(40);
+}
+
+void lcd_init (void)
+{
+	_delay_ms(40);
+	PORTD=0x30;
+	PORTD=PORTD | (1<<PD3);
+	PORTD=PORTD & (0<<PD3);
+	_delay_us(38);
+	PORTD=0x30;
+	PORTD=PORTD | (1<<PD3);
+	PORTD=PORTD & (0<<PD3);
+	_delay_us(38);
+	PORTD=0x20;
+	PORTD=PORTD | (1<<PD3);
+	PORTD=PORTD & (0<<PD3);
+	_delay_us(38);
+	lcd_command(0x28);
+	lcd_command(0x0c);
+	lcd_command(0x01);
+	_delay_ms(500);
+	lcd_command(0x06);
+}
+
+
+
+
+
+///////////////////////////////////
+
+
+
+int ADSC_check;
+
+void blink(int x)
+{
+	switch(x)
+	{
+        
+	case 0:
+	PORTB = 0b000001;
+    _delay_ms(500);
+	break;
+	
+	case 1:
+	PORTB = 0b000011;
+	_delay_ms(500);
+	PORTB = 0x0;
+	_delay_ms(500);
+	break;
+	
+	case 2:
+	PORTB = 0b000111;
+	_delay_ms(500);
+	PORTB = 0x0;
+	_delay_ms(500);
+	break;
+	
+	case 3:
+	PORTB = 0b001111;
+	_delay_ms(500);
+	PORTB = 0x0;
+	_delay_ms(500);
+	break;
+	
+	case 4:
+	PORTB = 0b011111;
+	_delay_ms(500);
+	PORTB = 0x0;
+	_delay_ms(500);
+	break;
+	
+	case 5:
+	PORTB =  0b111111;
+	_delay_ms(500);
+	PORTB = 0x0;
+	_delay_ms(500);
+	break;
+	}
+}
+
+ unsigned int  ADC_check()
+{
+
+    int ADSC_check = 1;
+    unsigned int value;
+    unsigned  int temp1 ;
+   
+	while(1)
+    {
+		if (ADSC_check)
+		{
+		
+            //bit_is_set(ADCSRA, ADSC); // C3:: start converting voltage on A0
+            ADCSRA |= (1<<ADSC);
+			ADSC_check = 0;
+		}
+		if (   ( ADCSRA & (1 << ADSC)) == 0 )  //when conv is over     //bit_is_clear(ADCSRA, ADSC) 
+		{       value = (ADC*5)/1024;
+                value =100*value;
+                 temp1  = (((ADC*5)%1024)*10)/1024;
+                value=value +(10*temp1);
+                temp1  = ((((ADC*5)%1024)*10)%1024)*10/1024;
+                value = value +temp1 ;  
+             ADSC_check = 1;
+             return value;    
+		  
+		}
+	}
+   
+}
+
+
+
+unsigned int gas_level(unsigned int ADC_val){
+	
+	if(ADC_val < 10)
+	{
+        
+        if(h==0)
+        {
+         lcd_command(1);     
+        _delay_ms(10);  
+        display_string("CLEAR");
+        h=1;
+        }      
+		blink(0);
+        return 0;
+	}
+  
+   
+
+    
+	if(ADC_val <= 100)
+	{
+         if(h==1)
+        {
+        lcd_command(1);     
+        _delay_ms(10);
+        display_string("GAS DETECTED");
+        h=0;
+        
+        }      
+		blink(1);
+        return 0;
+	}
+
+	if(ADC_val <= 200)
+	{
+         if(h==1)
+        {
+        lcd_command(1);  
+        _delay_ms(10);
+        display_string("GAS DETECTED");
+        h=0;
+        
+        }      
+		blink(2);
+        return 0;
+	}
+
+	if(ADC_val <= 300)
+	{
+         if(h==1)
+        {
+        lcd_command(1);
+        _delay_ms(10);
+        display_string("GAS DETECTED");
+        h=0;
+      
+        }      
+		blink(3);
+        return 0;
+	}
+
+	if(ADC_val <= 400)
+	{
+         if(h==1)
+        {
+        lcd_command(1);
+        _delay_ms(10);
+        display_string("GAS DETECTED");
+        h=0;
+        
+        }      
+		blink(4);
+        return 0;
+	}
+
+	if(ADC_val <= 499)
+	{
+         if(h==1)
+        {
+        lcd_command(1);
+        _delay_ms(10);
+        display_string("GAS DETECTED");
+        h=0;
+        
+        }      
+		blink(5);
+        return 0;
+	}
+}
+void display_string(const char *txt) // display string on LCD
+{
+	
+	while (*txt)
+	{
+		lcd_data(*txt++); 
+	}
+
+}
+int main() {
+    
+    DDRD |= 0b11111111;  // output for LCD
+    DDRC |= 0b00000000;  // input for ADC
+    DDRB |= 0b11111111;  // output for counter
+    
+    ADCSRA = 0b10000111;
+	ADMUX  = 0b01000010;
+    
+	PORTB = 1;
+	unsigned int ADC_val;
+	lcd_init();
+	while(1)
+	{
+		
+		ADC_val = ADC_check();
+		gas_level(ADC_val);
+		
+	}
+
+	return 0;
+}
+
