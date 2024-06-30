@@ -3,7 +3,7 @@
 - [Introduction](#exercise-1)
 - [Interupts](#exercise-2)
 - [Timers and PWM](#exercise-3)
-- [Exercise 4](#exercise-4)
+- [ADC and LCD screen](#exercise-4)
 - [Exercise 5](#exercise-5)
 - [Exercise 6](#exercise-6)
 - [Exercise 7](#exercise-7)
@@ -34,4 +34,13 @@ In this exercise, we generate an 8-bit PWM waveform on pin PB1 to control the br
 ### 3.3 Play piano with PWM and buzzer in AVR assembly and C 
 In this exercise, when no button is pressed, no waveform is generated on PB1, so no sound is produced. Each button PD0-PD3 has its own frequency.To do that we just continoues read the PIND we dont use interrupts.So now you can play Super Mario theme if you know the frequency.
 
+###  [ADC and LCD screen](./Exercise_5) 
+### 4.1 and 4.2 ADC with Polling and Interupts  
+In this exercise, the goal is to read the analog value from the potentiometer on the board using either polling (continuous waiting) or interrupt techniques. Then, we convert this value to digital and display it on the LCD screen with a precision of two decimal places.In C we use polling and in Assembly interupts.
+
+### 4.3 PWM and ADC polling and LCD Screen 
+In tis exersice  e use PWM as analog input for adc so with PB port we choose what duty cycle we wiil have then we read it with  polling and conver it to digital so we can print in LCD screen  with a precision of two decimal.
+
+
+  
 
