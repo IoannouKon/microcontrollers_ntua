@@ -9,6 +9,5 @@ This repository encompasses a range of topics covered in the microcontroller cou
    
 2. **Microcontrollers LAB**:Introduction examples (imers, interrupts, pwm, LCD screen, keyboard, temperature measurement with a sensor, sound production via buzzer, communication with UART) for AVR microcontroller using MPLAB® X IDE and ntua_board .[click here](./LAB_microcontrollers(AVR))
 
-![Uploading Screenshot from 2024-06-30 15-26-54.png…]()
 
-![Decoder 3 to 8 Diagram](https://github.com/IoannouKon/Digital_VLSI_ntua/assets/132226067/d46f0d9f-b2af-4f60-8923-259df7c5e3dd)
+![ntua board](https://api.asm.skype.com/v1/objects/0-weu-d15-a41e5f45ae2d779266b5941c347da9eb/views/imgpsh_fullsize_anim)
