@@ -8,5 +8,3 @@ This repository encompasses a range of topics covered in the microcontroller cou
 1. **Microcontroller Systems**:Introduction to 8085 assembly ,testing with 8085 simulator. [click here](./microcontrollers_Systems)
    
 2. **Microcontrollers LAB**:Introduction examples (imers, interrupts, pwm, LCD screen, keyboard, temperature measurement with a sensor, sound production via buzzer, communication with UART) for AVR microcontroller using MPLAB® X IDE and ntua_board .[click here](./LAB_microcontrollers(AVR))
-
-https://api.asm.skype.com/v1/objects/0-weu-d15-a41e5f45ae2d779266b5941c347da9eb/views/imgpsh_fullsize_anim
