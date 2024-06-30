@@ -9,10 +9,10 @@
 - [Exercise 7](#exercise-7)
 - [Exercise 8](#exercise-8)
 
-###  [Exercise 1](./Exercise_1) 
+###  [Introduction](./Exercise_1) 
 Introductory Exercise in which we simply implement a program in AVR Assembly that creates a "wagon" where one bit of the port D shifts from the MSB to the LSB and vice versa. Familiarization with MPLABX and live expressions for debugging.
 
-###  [Exercise 2](./Exercise_2) 
+###  [Interupts](./Exercise_2) 
 
 ## Using Interrupts with AVR Assembly and C 
 ### 2.1
