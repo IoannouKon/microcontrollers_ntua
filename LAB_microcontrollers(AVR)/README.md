@@ -6,8 +6,8 @@
 - [ADC and LCD screen](#exercise-4)
 - [Εxternal expansion ports in AVR](#exercise-5)
 - [Keyaboard 4*4 in expansion port](#exercise-6)
-- [Exercise 7](#exercise-7)
-- [Exercise 8](#exercise-8)
+- [Temperature sensor](#exercise-7)
+- [NTUAboard Communication with ESP8266](#exercise-8)
 
 ###  [Introduction](./Exercise_1) 
 Introductory Exercise in which we simply implement a program in AVR Assembly that creates a "wagon" where one bit of the port D shifts from the MSB to the LSB and vice versa. Familiarization with MPLABX and live expressions for debugging.
@@ -57,4 +57,23 @@ In AVR C we have two exersice
 6.1)Read the pressed button and display it on the screen!
 6.2)Read Code example: Enter a two-digit code on the board's keypad. If you enter the wrong code, LEDs PB0-PB5 will blink for 5 seconds, and during this time you cannot input a new character via the keypad. If you enter the correct code, LEDs PB0-PB5 remain lit continuously for 4 seconds!
 
+### [Temperature sensor](./Exercise_7) 
+ C a program that uses the previous routine to display the temperature in oC on an LCD display as a three-digit decimal value with a sign (-55 oC to +125 oC). Also, if no device is connected, display the message 'NO Device.
+
+ 
+### [NTUAboard Communication with ESP8266](./Exercise_8) 
+Here's a concise summary in English for a readme file describing the functionality of the program:
+
+
+**Issue 8.1:** Program initiates ESP8266 connection to network via UART. It verifies responses ("Success" or "Fail") and displays messages on LCD for both network connection and URL setting.
+
+**Issue 8.2:** Enhances program to incorporate temperature measurement from DS18B20 sensor and POT0 sensor for pressure simulation. Generates a status based on sensor values and keyboard inputs, displaying them on the LCD.
+
+**Issue 8.3:** Extends program to send payload data to the server using UART commands. Displays success or failure messages based on server responses, and prints server responses on the LCD if a "transmit" command is issued.
+
+**Repetition:** The program cycles through functionalities from Issues 8.1 to 8.3 continuously.
+
+---
+
+This summary outlines the tasks performed by the program using the ATmega328 microcontroller on the NTUAboard, communicating with an ESP8266 module via UART to manage network connections, sensor data, and server communications.
 
